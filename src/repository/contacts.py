@@ -1,3 +1,4 @@
+from datetime import date, timedelta
 from typing import List
 
 from sqlalchemy import select
@@ -11,10 +12,58 @@ class ContactRepository:
     def __init__(self, session: AsyncSession):
         self.db = session
 
-    async def get_contacts(self, skip: int, limit: int) -> List[Contact]:
-        stmt = select(Contact).offset(skip).limit(limit)
+    async def get_contacts(
+        self,
+        skip: int,
+        limit: int,
+        first_name: str | None = None,
+        last_name: str | None = None,
+        email: str | None = None,
+    ) -> List[Contact]:
+        stmt = select(Contact)
+
+        if first_name:
+            stmt = stmt.where(Contact.first_name.ilike(f"%{first_name}%"))
+        if last_name:
+            stmt = stmt.where(Contact.last_name.ilike(f"%{last_name}%"))
+        if email:
+            stmt = stmt.where(Contact.email.ilike(f"%{email}%"))
+
+        stmt = stmt.offset(skip).limit(limit)
         contacts = await self.db.execute(stmt)
         return contacts.scalars().all()
+
+    async def get_upcoming_birthdays(self, days: int = 7) -> List[Contact]:
+        stmt = select(Contact)
+        contacts = await self.db.execute(stmt)
+        today = date.today()
+        end_date = today + timedelta(days=days - 1)
+
+        upcoming_birthdays: List[Contact] = []
+
+        for contact in contacts.scalars().all():
+            next_birthday = self._get_next_birthday(contact.birthday, today)
+            if today <= next_birthday <= end_date:
+                upcoming_birthdays.append(contact)
+
+        return upcoming_birthdays
+
+    @staticmethod
+    def _get_next_birthday(birthday: date, today: date) -> date:
+        year = today.year
+
+        try:
+            next_birthday = birthday.replace(year=year)
+        except ValueError:
+            next_birthday = date(year, 2, 28)
+
+        if next_birthday < today:
+            try:
+                next_birthday = birthday.replace(year=year + 1)
+            except ValueError:
+                next_birthday = date(year + 1, 2, 28)
+
+        return next_birthday
 
     async def get_contact_by_id(self, contact_id: int) -> Contact | None:
         stmt = select(Contact).filter_by(id=contact_id)

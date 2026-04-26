@@ -19,11 +19,28 @@ CONTACT_NOT_FOUND = "Contact not found"
 
 @router.get("/", response_model=List[ContactResponse])
 async def read_contacts(
-    skip: int = 0, limit: int = 100, db: AsyncSession = Depends(get_db)
+    skip: int = 0,
+    limit: int = 100,
+    first_name: str | None = None,
+    last_name: str | None = None,
+    email: str | None = None,
+    db: AsyncSession = Depends(get_db),
 ):
     contact_service = ContactService(db)
-    contacts = await contact_service.get_contacts(skip, limit)
+    contacts = await contact_service.get_contacts(
+        skip=skip,
+        limit=limit,
+        first_name=first_name,
+        last_name=last_name,
+        email=email,
+    )
     return contacts
+
+
+@router.get("/birthdays", response_model=List[ContactResponse])
+async def read_upcoming_birthdays(db: AsyncSession = Depends(get_db)):
+    contact_service = ContactService(db)
+    return await contact_service.get_upcoming_birthdays()
 
 
 @router.get("/{contact_id}", response_model=ContactResponse)
@@ -37,12 +54,8 @@ async def read_contact(contact_id: int, db: AsyncSession = Depends(get_db)):
     return contact
 
 
-@router.post(
-    "/", response_model=ContactResponse, status_code=status.HTTP_201_CREATED
-)
-async def create_contact(
-    body: ContactModel, db: AsyncSession = Depends(get_db)
-):
+@router.post("/", response_model=ContactResponse, status_code=status.HTTP_201_CREATED)
+async def create_contact(body: ContactModel, db: AsyncSession = Depends(get_db)):
     contact_service = ContactService(db)
     return await contact_service.create_contact(body)
 
