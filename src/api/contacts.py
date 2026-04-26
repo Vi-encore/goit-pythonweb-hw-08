@@ -38,9 +38,9 @@ async def read_contacts(
 
 
 @router.get("/birthdays", response_model=List[ContactResponse])
-async def read_upcoming_birthdays(db: AsyncSession = Depends(get_db)):
+async def read_upcoming_birthdays(days: int = 7, db: AsyncSession = Depends(get_db)):
     contact_service = ContactService(db)
-    return await contact_service.get_upcoming_birthdays()
+    return await contact_service.get_upcoming_birthdays(days)
 
 
 @router.get("/{contact_id}", response_model=ContactResponse)
