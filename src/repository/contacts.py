@@ -36,7 +36,7 @@ class ContactRepository:
         return contact
 
     async def update_contact(
-        self, contact_id: int, body: ContactUpdate
+        self, contact_id: int, body: ContactModel | ContactUpdate
     ) -> Contact | None:
         contact = await self.get_contact_by_id(contact_id)
         if contact:
