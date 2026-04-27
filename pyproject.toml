@@ -13,8 +13,11 @@ dependencies = [
     "pydantic[email] (>=2.13.3,<3.0.0)",
     "pydantic-settings (>=2.14.0,<3.0.0)",
     "fastapi (>=0.136.1,<0.137.0)",
-    "uvicorn (>=0.46.0,<0.47.0)"
+    "uvicorn (>=0.46.0,<0.47.0)",
 ]
+
+[tool.poetry]
+package-mode = false
 
 
 [build-system]

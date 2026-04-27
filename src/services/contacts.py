@@ -29,10 +29,11 @@ class ContactService:
     async def get_contact(self, contact_id: int):
         return await self.contact_repository.get_contact_by_id(contact_id)
 
-    async def update_contact(
-        self, contact_id: int, body: ContactModel | ContactUpdate
-    ):
-        return await self.contact_repository.update_contact(contact_id, body)
+    async def replace_contact(self, contact_id: int, body: ContactModel):
+        return await self.contact_repository.replace_contact(contact_id, body)
+
+    async def patch_contact(self, contact_id: int, body: ContactUpdate):
+        return await self.contact_repository.patch_contact(contact_id, body)
 
     async def remove_contact(self, contact_id: int):
         return await self.contact_repository.remove_contact(contact_id)

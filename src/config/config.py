@@ -1,5 +1,14 @@
-class Config:
-    DB_URL = "postgresql+asyncpg://postgres:12345@localhost:5432/contacts_app"
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
-config = Config
+class Config(BaseSettings):
+    DB_URL: str
+
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        env_file_encoding="utf-8",
+        extra="ignore",
+    )
+
+
+config = Config()

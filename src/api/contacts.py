@@ -38,7 +38,9 @@ async def read_contacts(
 
 
 @router.get("/birthdays", response_model=List[ContactResponse])
-async def read_upcoming_birthdays(days: int = 7, db: AsyncSession = Depends(get_db)):
+async def read_upcoming_birthdays(
+    days: int = 7, db: AsyncSession = Depends(get_db)
+):
     contact_service = ContactService(db)
     return await contact_service.get_upcoming_birthdays(days)
 
@@ -54,8 +56,12 @@ async def read_contact(contact_id: int, db: AsyncSession = Depends(get_db)):
     return contact
 
 
-@router.post("/", response_model=ContactResponse, status_code=status.HTTP_201_CREATED)
-async def create_contact(body: ContactModel, db: AsyncSession = Depends(get_db)):
+@router.post(
+    "/", response_model=ContactResponse, status_code=status.HTTP_201_CREATED
+)
+async def create_contact(
+    body: ContactModel, db: AsyncSession = Depends(get_db)
+):
     contact_service = ContactService(db)
     return await contact_service.create_contact(body)
 
@@ -65,7 +71,7 @@ async def update_contact(
     body: ContactModel, contact_id: int, db: AsyncSession = Depends(get_db)
 ):
     contact_service = ContactService(db)
-    contact = await contact_service.update_contact(contact_id, body)
+    contact = await contact_service.replace_contact(contact_id, body)
     if contact is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail=CONTACT_NOT_FOUND
@@ -78,7 +84,7 @@ async def patch_contact(
     body: ContactUpdate, contact_id: int, db: AsyncSession = Depends(get_db)
 ):
     contact_service = ContactService(db)
-    contact = await contact_service.update_contact(contact_id, body)
+    contact = await contact_service.patch_contact(contact_id, body)
     if contact is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail=CONTACT_NOT_FOUND

@@ -84,12 +84,27 @@ class ContactRepository:
             await self.db.commit()
         return contact
 
-    async def update_contact(
-        self, contact_id: int, body: ContactModel | ContactUpdate
+    async def replace_contact(
+        self, contact_id: int, body: ContactModel
     ) -> Contact | None:
         contact = await self.get_contact_by_id(contact_id)
         if contact:
-            for key, value in body.model_dump(exclude_unset=True).items():
+            for key, value in body.model_dump().items():
+                setattr(contact, key, value)
+
+            await self.db.commit()
+            await self.db.refresh(contact)
+
+        return contact
+
+    async def patch_contact(
+        self, contact_id: int, body: ContactUpdate
+    ) -> Contact | None:
+        contact = await self.get_contact_by_id(contact_id)
+        if contact:
+            for key, value in body.model_dump(
+                exclude_unset=True, exclude_none=True
+            ).items():
                 setattr(contact, key, value)
 
             await self.db.commit()
